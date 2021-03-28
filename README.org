@@ -1,0 +1,3 @@
+* synchronize-git
+
+A function to synchronize a bunch of git repositories, and display the status in a nice buffer.
