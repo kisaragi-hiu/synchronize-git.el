@@ -2,8 +2,8 @@
 
 ;; Author: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; Homepage: https://github.com/kisaragi-hiu/synchronize-git.el
-;; Version: 0.9.0
-;; Package-Requires: ((emacs "24.1"))
+;; Version: 0.9.1
+;; Package-Requires: ((emacs "24.1") (dash "2.18.1") (s "1.12.0"))
 ;; Keywords: convenience vc
 
 
