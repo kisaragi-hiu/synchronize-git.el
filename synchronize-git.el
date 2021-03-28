@@ -2,7 +2,7 @@
 
 ;; Author: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; Homepage: https://github.com/kisaragi-hiu/synchronize-git.el
-;; Version: 0.9.1
+;; Version: 0.9.2
 ;; Package-Requires: ((emacs "24.1") (dash "2.18.1") (s "1.12.0"))
 ;; Keywords: convenience vc
 
@@ -50,7 +50,7 @@ Run git pull then git push in REPOS, asynchronously. Display
 synchronization status in a new buffer.
 
 REPOS is `synchronize-git-default-repos' by default."
-  (interactive synchonize-git-default-repos)
+  (interactive synchronize-git-default-repos)
   (let ((shell-file-name "bash")
         (inhibit-read-only t))
     ;; Create the status buffer.
