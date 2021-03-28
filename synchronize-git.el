@@ -2,7 +2,7 @@
 
 ;; Author: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; Homepage: https://github.com/kisaragi-hiu/synchronize-git.el
-;; Version: 0.9.2
+;; Version: 0.9.3
 ;; Package-Requires: ((emacs "24.1") (dash "2.18.1") (s "1.12.0"))
 ;; Keywords: convenience vc
 
@@ -83,10 +83,9 @@ REPOS is `synchronize-git-default-repos' by default."
              (with-current-buffer "*repo sync*"
                (let* ((inhibit-read-only t)
                       (default-directory repo)
-                      (dirty? (/= 0 (call-process
-                                     "git"
-                                     nil nil nil
-                                     "diff" "--quiet" "--ignore-submodules"))))
+                      (dirty? (with-temp-buffer
+                                (call-process "git" nil '(t nil) nil "status" "--short" "--ignore-submodules")
+                                (/= 0 (buffer-size)))))
                  (goto-char (point-min))
                  (while (search-forward (format "Synchronizing %s..." repo)
                                         nil t)
