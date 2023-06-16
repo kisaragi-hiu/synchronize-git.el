@@ -2,7 +2,7 @@
 
 ;; Author: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; Homepage: https://github.com/kisaragi-hiu/synchronize-git.el
-;; Version: 0.10.1
+;; Version: 0.10.2
 ;; Package-Requires: ((emacs "24.1") (dash "2.18.1") (s "1.12.0"))
 ;; Keywords: convenience vc
 
@@ -38,6 +38,14 @@
 
 (require 's)
 (require 'dash)
+
+(defun synchronize-git-kill-buffers ()
+  "Kill all repo sync output buffers."
+  (interactive)
+  (--each (buffer-list)
+    (when (eq (buffer-local-value 'major-mode it)
+              'synchronize-git-output-mode)
+      (kill-buffer it))))
 
 (defconst synchronize-git--type-command-map
   '((git . ("git" "pull"))
@@ -152,6 +160,8 @@ REPOS is `synchronize-git-default-repos' by default."
              (default-directory path)
              (process
               (apply #'start-process "sync" output-buffer command)))
+        (with-current-buffer (get-buffer-create output-buffer)
+          (setq-local major-mode 'synchronize-git-output-mode))
         (with-current-buffer (get-buffer-create "*repo sync*")
           (insert (format "Synchronizing %s...\n" path)))
         (set-process-filter
