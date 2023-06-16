@@ -2,7 +2,7 @@
 
 ;; Author: Kisaragi Hiu <mail@kisaragi-hiu.com>
 ;; Homepage: https://github.com/kisaragi-hiu/synchronize-git.el
-;; Version: 0.10.2
+;; Version: 0.10.3
 ;; Package-Requires: ((emacs "24.1") (dash "2.18.1") (s "1.12.0"))
 ;; Keywords: convenience vc
 
@@ -174,8 +174,9 @@ REPOS is `synchronize-git-default-repos' by default."
          (lambda (process _change)
            ;; don't do anything if `process' hasn't exited
            (-when-let* ((status (and (not (process-live-p process))
-                                     (process-exit-status process))))
-             (with-current-buffer "*repo sync*"
+                                     (process-exit-status process)))
+                        (buf (get-buffer "*repo sync*")))
+             (with-current-buffer buf
                (let* ((inhibit-read-only t)
                       (default-directory path)
                       (dirty?
