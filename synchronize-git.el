@@ -142,8 +142,11 @@ REPOS is `synchronize-git-default-repos' by default."
   (interactive synchronize-git-default-repos)
   (let ((shell-file-name "bash")
         (inhibit-read-only t)
-        ;; Remove repos whose path is nil
-        (repos (-filter #'synchronize-git--repo-path repos)))
+        ;; Remove repos whose path is nil or not a folder
+        (repos (--filter
+                (-when-let (path (synchronize-git--repo-path it))
+                  (file-directory-p path))
+                repos)))
     ;; Create the status buffer.
     (with-current-buffer (get-buffer-create "*repo sync*")
       (erase-buffer)
