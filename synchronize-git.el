@@ -129,6 +129,35 @@ REPO can be specified as:
 - (COMMAND PATH) where COMMAND is a list ::
   Directly specify the command and the path.")
 
+(define-derived-mode synchronize-git-status-mode special-mode
+  "Repo Sync Status"
+  "Major mode for the repo sync status buffer."
+  :interactive nil)
+
+(define-derived-mode synchronize-git-output-mode fundamental-mode
+  "Repo Sync Output"
+  "Major mode for the repo sync output buffers."
+  :interactive nil)
+
+(defun synchronize-git--make-button (str func &rest properties)
+  "Return a text button of STR that runs FUNC when pressed.
+
+PROPERTIES are passed to `make-text-button' for specifying other
+properties like `face'."
+  (declare (pure t)
+           (side-effect-free t)
+           (indent 1))
+  (apply
+   #'make-text-button
+   ;; `make-text-button' mutates; copy to avoid STR
+   ;; being modified.
+   (copy-sequence str) nil
+   'follow-link t
+   'action (lambda (&rest _)
+             ;; Ensure FUNC never gets an argument
+             (funcall func))
+   properties))
+
 ;;;###autoload
 (defun synchronize-git (&rest repos)
   "Pull from all of REPOS.
@@ -150,7 +179,7 @@ REPOS is `synchronize-git-default-repos' by default."
     ;; Create the status buffer.
     (with-current-buffer (get-buffer-create "*repo sync*")
       (erase-buffer)
-      (special-mode)
+      (synchronize-git-status-mode)
       (insert (format "Repo Sync: %s\n\n" (format-time-string "%FT%T%z")))
       ;; Allow `revert-buffer' to work.
       (set (make-local-variable 'revert-buffer-function)
@@ -164,9 +193,12 @@ REPOS is `synchronize-git-default-repos' by default."
              (process
               (apply #'start-process "sync" output-buffer command)))
         (with-current-buffer (get-buffer-create output-buffer)
-          (setq-local major-mode 'synchronize-git-output-mode))
+          (synchronize-git-output-mode))
         (with-current-buffer (get-buffer-create "*repo sync*")
-          (insert (format "Synchronizing %s...\n" path)))
+          (insert (format "Synchronizing %s...\n"
+                          (synchronize-git--make-button path
+                            (lambda ()
+                              (pop-to-buffer output-buffer))))))
         (set-process-filter
          process
          (lambda (process output)
@@ -191,14 +223,21 @@ REPOS is `synchronize-git-default-repos' by default."
                  (while (search-forward (format "Synchronizing %s..." path)
                                         nil t)
                    (cond (dirty?
-                          (replace-match (format "Synchronizing %s... has uncommitted changes!" path)
-                                         nil t))
+                          (insert " has uncommitted changes!"))
                          ((= status 0)
-                          (replace-match (format "Synchronizing %s...done" path)
-                                         nil t))
+                          (insert "done"))
                          (t
-                          (replace-match (format "Synchronizing %s failed: %s" path status)
-                                         nil t)))))))))))
+                          ;; Delete the ellipsis
+                          (delete-char -3)
+                          (insert (format " failed: %s" status))))))))))))
+
+    (with-current-buffer (get-buffer-create "*repo sync*")
+      (insert "\n"
+              (synchronize-git--make-button "Close repo sync buffers"
+                (lambda ()
+                  (synchronize-git-kill-buffers)
+                  (kill-buffer))
+                'face '(error button))))
     (when (called-interactively-p 'interactive)
       (display-buffer "*repo sync*"))))
 
