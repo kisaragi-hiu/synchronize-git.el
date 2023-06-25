@@ -39,6 +39,9 @@
 (require 's)
 (require 'dash)
 
+;; FIXME: put this in a separate file
+(require 'ert)
+
 (defun synchronize-git-kill-buffers ()
   "Kill all repo sync output buffers."
   (interactive)
