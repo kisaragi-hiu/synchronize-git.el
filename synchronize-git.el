@@ -236,11 +236,15 @@ REPOS is `synchronize-git-default-repos' by default."
 
     (with-current-buffer (get-buffer-create "*repo sync*")
       (insert "\n"
+              (synchronize-git--make-button "Try again"
+                #'revert-buffer
+                'face 'button)
+              "\n"
               (synchronize-git--make-button "Close repo sync buffers"
                 (lambda ()
                   (synchronize-git-kill-buffers)
                   (kill-buffer))
-                'face '(error button))))
+                'face 'button)))
     (when (called-interactively-p 'interactive)
       (display-buffer "*repo sync*"))))
 
